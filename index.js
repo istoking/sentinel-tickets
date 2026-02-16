@@ -12,6 +12,8 @@ const {
 const { autoCloseTicket } = require("./utils/ticketAutoClose.js");
 const { autoDeleteTicket } = require("./utils/ticketAutoDelete.js");
 
+
+(async () => {
 client.startingTime = Date.now();
 
 function guardedInterval(fn) {
@@ -203,3 +205,4 @@ client.login(process.env.BOT_TOKEN).catch(async (error) => {
   await logError("ERROR", error);
   process.exit(1);
 });
+})();

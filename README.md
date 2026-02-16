@@ -127,7 +127,7 @@ Join my [Discord Server](https://discord.gg/vhXCzj9S3J) for community support. P
 This project is licensed under the [MIT License](LICENSE).
 ---
 
-## patch notes (2026-02-16)
+## Local patch notes (2026-02-16)
 
 This patch includes a small set of performance + safety tweaks on top of upstream Sentinel Tickets.
 
