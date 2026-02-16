@@ -1,5 +1,5 @@
-const { MessageFlags } = require("discord.js");
 const { mainDB, client } = require("../init.js");
+const { config } = require("../config.js");
 const {
   configEmbed,
   sanitizeInput,
@@ -75,7 +75,7 @@ async function getFeedback(interaction, i, withModal = true) {
   await mainDB.push("ratings", i);
   await interaction.editReply({
     content: "Your feedback has been sent successfully!",
-    flags: MessageFlags.Ephemeral,
+    ephemeral: true,
   });
   await logMessage(
     `${interaction.user.tag} rated the ticket "${currentFooter}" with ${i} stars`,

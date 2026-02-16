@@ -1,5 +1,5 @@
-const { MessageFlags } = require("discord.js");
 const { blacklistDB, client } = require("../init.js");
+const { config } = require("../config.js");
 const {
   configEmbed,
   sanitizeInput,
@@ -62,7 +62,7 @@ async function blacklistAdd(
       // User is already blacklisted
       return interaction.editReply({
         embeds: [alreadyBlacklistedEmbedUser],
-        flags: MessageFlags.Ephemeral,
+        ephemeral: true,
       });
     } else {
       // User is not blacklisted
@@ -85,7 +85,7 @@ async function blacklistAdd(
           console.error(`Role with ID ${roleId} not found.`);
         }
       });
-      await logMessage(
+      logMessage(
         `${interaction.user.tag} added ${user.tag} to the blacklist with reason ${reason} and duration ${duration}.`,
       );
       let logChannelId = config.logs.blacklistAdd || config.logs.default;
@@ -136,7 +136,7 @@ async function blacklistAdd(
 
       return interaction.editReply({
         embeds: [blacklistedEmbedUser],
-        flags: MessageFlags.Ephemeral,
+        ephemeral: true,
       });
     }
   }
@@ -187,7 +187,7 @@ async function blacklistAdd(
       // Role is already blacklisted
       return interaction.editReply({
         embeds: [alreadyBlacklistedEmbedRole],
-        flags: MessageFlags.Ephemeral,
+        ephemeral: true,
       });
     } else {
       // Role is not blacklisted
@@ -197,7 +197,7 @@ async function blacklistAdd(
         staff: interaction.user.id,
         duration: duration,
       });
-      await logMessage(
+      logMessage(
         `${interaction.user.tag} added ${role.name} to the blacklist with reason ${reason} and duration ${duration}.`,
       );
       let logChannelId = config.logs.blacklistAdd || config.logs.default;
@@ -247,7 +247,7 @@ async function blacklistAdd(
       }
       return interaction.editReply({
         embeds: [blacklistedEmbedRole],
-        flags: MessageFlags.Ephemeral,
+        ephemeral: true,
       });
     }
   }
@@ -309,7 +309,7 @@ async function blacklistRemove(
       // User is not blacklisted
       return interaction.editReply({
         embeds: [notBlacklistedEmbedUser],
-        flags: MessageFlags.Ephemeral,
+        ephemeral: true,
       });
     } else {
       // User is blacklisted
@@ -329,7 +329,7 @@ async function blacklistRemove(
           console.error(`Role with ID ${roleId} not found.`);
         }
       });
-      await logMessage(
+      logMessage(
         `${interaction.user.tag} removed ${user.tag} from the blacklist with reason ${reason}.`,
       );
       let logChannelId = config.logs.blacklistRemove || config.logs.default;
@@ -376,7 +376,7 @@ async function blacklistRemove(
 
       return interaction.editReply({
         embeds: [unblacklistedEmbedUser],
-        flags: MessageFlags.Ephemeral,
+        ephemeral: true,
       });
     }
   }
@@ -430,12 +430,12 @@ async function blacklistRemove(
       // Role is not blacklisted
       return interaction.editReply({
         embeds: [notBlacklistedEmbedRole],
-        flags: MessageFlags.Ephemeral,
+        ephemeral: true,
       });
     } else {
       // Role is blacklisted
       await blacklistDB.delete(`role-${role.id}`);
-      await logMessage(
+      logMessage(
         `${interaction.user.tag} removed ${role.name} from the blacklist with reason ${reason}.`,
       );
       let logChannelId = config.logs.blacklistRemove || config.logs.default;
@@ -482,7 +482,7 @@ async function blacklistRemove(
 
       return interaction.editReply({
         embeds: [unblacklistedEmbedRole],
-        flags: MessageFlags.Ephemeral,
+        ephemeral: true,
       });
     }
   }

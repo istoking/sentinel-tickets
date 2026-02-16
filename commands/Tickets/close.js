@@ -1,11 +1,8 @@
-const {
-  SlashCommandBuilder,
-  PermissionFlagsBits,
-  MessageFlags,
-} = require("discord.js");
+const { SlashCommandBuilder, PermissionFlagsBits } = require("discord.js");
 const { ticketsDB } = require("../../init.js");
 const { checkSupportRole } = require("../../utils/mainUtils.js");
 const { closeTicket } = require("../../utils/ticketClose.js");
+const { config } = require("../../config.js");
 
 module.exports = {
   enabled: config.commands.close.enabled,
@@ -27,7 +24,7 @@ module.exports = {
       return interaction.reply({
         content:
           config.errors.not_in_a_ticket || "You are not in a ticket channel!",
-        flags: MessageFlags.Ephemeral,
+        ephemeral: true,
       });
     }
 
@@ -36,7 +33,7 @@ module.exports = {
     ) {
       return interaction.reply({
         content: "This ticket is already closed!",
-        flags: MessageFlags.Ephemeral,
+        ephemeral: true,
       });
     }
 
@@ -45,7 +42,7 @@ module.exports = {
       return interaction.reply({
         content:
           config.errors.not_allowed || "You are not allowed to use this!",
-        flags: MessageFlags.Ephemeral,
+        ephemeral: true,
       });
     }
 

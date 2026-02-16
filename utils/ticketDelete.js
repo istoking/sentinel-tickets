@@ -4,6 +4,7 @@ const {
   ActionRowBuilder,
 } = require("discord.js");
 const { mainDB, ticketsDB, client } = require("../init.js");
+const { config } = require("../config.js");
 const {
   configEmbed,
   getUser,
@@ -323,7 +324,7 @@ async function deleteTicket(interaction, reason = "No reason provided.") {
             client.emit("error", error);
           }
         }
-        await logMessage(
+        logMessage(
           `The bot could not DM ${ticketUserID.tag} because their DMs were closed`,
         );
       }

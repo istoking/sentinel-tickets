@@ -1,5 +1,5 @@
-const { MessageFlags } = require("discord.js");
 const { client, ticketsDB } = require("../init.js");
+const { config } = require("../config.js");
 const {
   configEmbed,
   sanitizeInput,
@@ -113,9 +113,9 @@ async function transcriptTicket(interaction) {
   }
   await interaction.editReply({
     embeds: [transcriptReplyEmbed],
-    flags: isEphemeral ? MessageFlags.Ephemeral : undefined,
+    ephemeral: isEphemeral,
   });
-  await logMessage(
+  logMessage(
     `${interaction.user.tag} manually saved the transcript of ticket #${interaction.channel.name} which was created by ${ticketUserID.tag}`,
   );
 }

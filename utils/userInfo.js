@@ -1,15 +1,7 @@
-const { MessageFlags } = require("discord.js");
 const { configEmbed, sanitizeInput } = require("./mainUtils.js");
+const { config } = require("../config.js");
 
 async function userInfo(interaction, member, isEphemeral) {
-  if (!member || !interaction.guild.members.cache.has(member.id)) {
-    await interaction.editReply({
-      content: "This user is no longer in the server.",
-      ephemeral: isEphemeral,
-    });
-    return;
-  }
-
   const user = member.user;
   const joinedAtTimestamp = `<t:${Math.floor(member.joinedAt / 1000)}:F>`;
   const createdAtTimestamp = `<t:${Math.floor(user.createdAt / 1000)}:F>`;
@@ -70,7 +62,7 @@ async function userInfo(interaction, member, isEphemeral) {
 
   await interaction.editReply({
     embeds: [userInfoEmbed],
-    flags: isEphemeral ? MessageFlags.Ephemeral : undefined,
+    ephemeral: isEphemeral,
   });
 }
 

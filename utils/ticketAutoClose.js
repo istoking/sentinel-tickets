@@ -5,9 +5,8 @@ const {
   StringSelectMenuBuilder,
   StringSelectMenuOptionBuilder,
 } = require("discord.js");
-const dotenv = require("dotenv");
-dotenv.config({ quiet: true });
 const { mainDB, ticketsDB, client, ticketCategories } = require("../init.js");
+const { config } = require("../config.js");
 const {
   configEmbed,
   getUser,
@@ -375,7 +374,7 @@ async function autoCloseTicket(channelID, creatorLeft = false) {
               client.emit("error", error);
             }
           }
-          await logMessage(
+          logMessage(
             `The bot could not DM ${ticketUserID.tag} because their DMs were closed`,
           );
         }

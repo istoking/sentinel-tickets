@@ -4,9 +4,9 @@ const {
   ActionRowBuilder,
   StringSelectMenuBuilder,
   StringSelectMenuOptionBuilder,
-  MessageFlags,
 } = require("discord.js");
 const { mainDB, ticketsDB, ticketCategories, client } = require("../init.js");
+const { config } = require("../config.js");
 const {
   configEmbed,
   sanitizeInput,
@@ -50,7 +50,7 @@ async function unclaimTicket(interaction) {
 
   await interaction.editReply({
     content: "You successfully unclaimed this ticket!",
-    flags: MessageFlags.Ephemeral,
+    ephemeral: true,
   });
   await interaction.channel.permissionOverwrites.delete(interaction.user);
   await interaction.channel.send({ embeds: [unclaimedEmbed] });
@@ -153,7 +153,7 @@ async function unclaimTicket(interaction) {
         }
       }
       await mainDB.sub("totalClaims", 1);
-      await logMessage(
+      logMessage(
         `${interaction.user.tag} unclaimed the ticket #${interaction.channel.name}`,
       );
     });

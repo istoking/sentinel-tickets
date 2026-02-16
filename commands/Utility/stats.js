@@ -1,10 +1,7 @@
-const {
-  SlashCommandBuilder,
-  PermissionFlagsBits,
-  MessageFlags,
-} = require("discord.js");
+const { SlashCommandBuilder, PermissionFlagsBits } = require("discord.js");
 const packageJson = require("../../package.json");
 const { mainDB } = require("../../init.js");
+const { config } = require("../../config.js");
 const {
   configEmbed,
   formatTime,
@@ -55,9 +52,7 @@ module.exports = {
         config.statsEmbed.ephemeral !== undefined
           ? config.statsEmbed.ephemeral
           : false;
-      await interaction.deferReply({
-        flags: isEphemeral ? MessageFlags.Ephemeral : undefined,
-      });
+      await interaction.deferReply({ ephemeral: isEphemeral });
       const totalTickets = (await mainDB.get("totalTickets")) ?? 0;
       const openTickets = (await mainDB.get("openTickets")) ?? 0;
       const totalClaims = (await mainDB.get("totalClaims")) ?? 0;
@@ -77,8 +72,6 @@ module.exports = {
           0,
         ) / totalTicketCreators;
       const totalUptime = Math.floor(process.uptime());
-      const memberCount = interaction.guild.memberCount;
-      const creationDate = `<t:${Math.floor(interaction.guild.createdAt.getTime() / 1000)}:F>`;
 
       const defaultValues = {
         color: "#2FF200",
@@ -107,10 +100,6 @@ module.exports = {
           value: `> Total Reviews: ${totalReviews}\n> Average Rating: ${ratingsArray.length ? averageRating.toFixed(1) : 0}/5.0`,
         },
         {
-          name: config.statsEmbed.field_server || "🏢 Server",
-          value: `> Creation Date: ${creationDate}\n> Total Members: ${memberCount}`,
-        },
-        {
           name: config.statsEmbed.field_bot || "🤖 Bot",
           value: `> Version: v${packageJson.version}\n> RAM Usage: ${ramUsageMB} MB\n> Uptime: ${formatTime(totalUptime)}`,
         },
@@ -118,7 +107,7 @@ module.exports = {
 
       await interaction.editReply({
         embeds: [statsEmbed],
-        flags: isEphemeral ? MessageFlags.Ephemeral : undefined,
+        ephemeral: isEphemeral,
       });
     } else if (subcommand === "set") {
       if (
@@ -130,7 +119,7 @@ module.exports = {
         return interaction.reply({
           content:
             config.errors.not_allowed || "You are not allowed to use this!",
-          flags: MessageFlags.Ephemeral,
+          ephemeral: true,
         });
       }
       const isEphemeral =
@@ -139,9 +128,7 @@ module.exports = {
           : true;
       const statistic = interaction.options.getString("statistic");
       const value = interaction.options.getInteger("value");
-      await interaction.deferReply({
-        flags: isEphemeral ? MessageFlags.Ephemeral : undefined,
-      });
+      await interaction.deferReply({ ephemeral: isEphemeral });
       const defaultValues = {
         color: "#2FF200",
         title: "📊 Statistics Modification",
@@ -184,7 +171,7 @@ module.exports = {
       await mainDB.set(statistic, value);
       await interaction.editReply({
         embeds: [statsSetEmbed],
-        flags: isEphemeral ? MessageFlags.Ephemeral : undefined,
+        ephemeral: isEphemeral,
       });
     }
   },

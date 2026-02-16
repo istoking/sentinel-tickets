@@ -1,9 +1,6 @@
-const {
-  SlashCommandBuilder,
-  PermissionFlagsBits,
-  MessageFlags,
-} = require("discord.js");
+const { SlashCommandBuilder, PermissionFlagsBits } = require("discord.js");
 const { client, ticketsDB, ticketCategories } = require("../../init.js");
+const { config } = require("../../config.js");
 const {
   sanitizeInput,
   logMessage,
@@ -34,7 +31,7 @@ module.exports = {
       return interaction.reply({
         content:
           config.errors.not_in_a_ticket || "You are not in a ticket channel!",
-        flags: MessageFlags.Ephemeral,
+        ephemeral: true,
       });
     }
 
@@ -43,7 +40,7 @@ module.exports = {
       return interaction.reply({
         content:
           config.errors.not_allowed || "You are not allowed to use this!",
-        flags: MessageFlags.Ephemeral,
+        ephemeral: true,
       });
     }
 
@@ -60,14 +57,14 @@ module.exports = {
     if (!choices.includes(option)) {
       return interaction.reply({
         content: `Invalid option. Available options are: ${choices.join(", ")}`,
-        flags: MessageFlags.Ephemeral,
+        ephemeral: true,
       });
     }
 
     if (option === ticketType) {
       return interaction.reply({
         content: "This ticket is already in that category.",
-        flags: MessageFlags.Ephemeral,
+        ephemeral: true,
       });
     }
 
@@ -75,9 +72,7 @@ module.exports = {
       config.moveEmbed.ephemeral !== undefined
         ? config.moveEmbed.ephemeral
         : false;
-    await interaction.deferReply({
-      flags: isEphemeral ? MessageFlags.Ephemeral : undefined,
-    });
+    await interaction.deferReply({ ephemeral: isEphemeral });
 
     // Find the categoryID based on the name
     const category = Object.values(ticketCategories).find(
@@ -154,9 +149,9 @@ module.exports = {
 
     await interaction.editReply({
       embeds: [moveEmbed],
-      flags: isEphemeral ? MessageFlags.Ephemeral : undefined,
+      ephemeral: isEphemeral,
     });
-    await logMessage(
+    logMessage(
       `${interaction.user.tag} moved the ticket #${interaction.channel.name} to the category ${option}.`,
     );
   },

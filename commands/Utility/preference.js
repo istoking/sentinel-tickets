@@ -1,10 +1,7 @@
-const {
-  SlashCommandBuilder,
-  PermissionFlagsBits,
-  MessageFlags,
-} = require("discord.js");
+const { SlashCommandBuilder, PermissionFlagsBits } = require("discord.js");
 const { blacklistDB } = require("../../init.js");
 const { configEmbed } = require("../../utils/mainUtils.js");
+const { config } = require("../../config.js");
 
 module.exports = {
   enabled: config.commands.preference.enabled,
@@ -40,7 +37,7 @@ module.exports = {
     .setDMPermission(false),
   async execute(interaction) {
     if (interaction.options.getSubcommand() === "dm") {
-      await interaction.deferReply({ flags: MessageFlags.Ephemeral });
+      await interaction.deferReply({ ephemeral: true });
       const action = interaction.options.getString("type");
       const enabled = interaction.options.getBoolean("enabled");
       const id = interaction.user.id;
@@ -75,7 +72,7 @@ module.exports = {
 
       await interaction.editReply({
         embeds: [preferenceEmbed],
-        flags: MessageFlags.Ephemeral,
+        ephemeral: true,
       });
     }
   },

@@ -38,7 +38,7 @@ onUserLeave: "close" # L'action automatisée que le bot entreprendra lorsqu'un u
 
 # La limite fixée par Discord est de 25, bien qu'il soit fortement recommandé de ne pas utiliser un nombre aussi élevé de types étant donné que chaque type utilise 2 catégories et que la limite de Discord est de 50 catégories, vous n'aurez plus de catégories à utiliser pour vos salons Discord normales. ...
 # Pour la section autorisations, les permissions possibles sont: ViewChannel, SendMessages, EmbedLinks, AttachFiles, ReadMessageHistory, ManageChannels, ManageWebhooks, CreateInstantInvite, CreatePrivateThreads, CreatePublicThreads, SendMessagesInThreads, AddReactions, UseExternalEmojis, UseExternalStickers, MentionEveryone, ManageMessages, ManageThreads, UseApplicationCommands, SendVoiceMessages, UseEmbeddedActivities, SendTTSMessages
-# NOTE: Le bot devra peut-être recevoir des autorisations d'administrateur en fonction des autorisations que vous avez définies dans les catégories. Si vous obtenez une erreur de console indiquant « Autorisations manquantes », alors votre bot ne dispose pas d'autorisations.																																																	   
+# NOTE: Le bot devra peut-être recevoir des autorisations d'administrateur en fonction des autorisations que vous avez définies dans les catégories. Si vous obtenez une erreur de console indiquant « Autorisations manquantes », alors votre bot ne dispose pas d'autorisations.
 TicketCategories:
   - id: 1 # ID unique pour chaque catégorie, UTILISEZ UNIQUEMENT DES CHIFFRES (il est suggéré d'incrémenter simplement cette valeur de 1 à chaque fois)
     name: "report" # Le nom de la catégorie, il sera en minuscule de toute façon
@@ -678,7 +678,7 @@ logUnblacklistEmbed:
 blacklistListEmbed:
   color: "#2FF200"
   title: "Blacklist {type} - Page {page}"
-# La description est le contenu de la commande blacklist list, cette option ne fonctionnera donc pas pour cette intégration. 
+# La description est le contenu de la commande blacklist list, cette option ne fonctionnera donc pas pour cette intégration.
 #  description: ""
   timestamp: false
   URL: ""
@@ -731,7 +731,7 @@ logAddEmbed:
   field_ticket: "• Ticket"
   field_reason: "• Raison"
 
-# Intégration pour la commande alert 
+# Intégration pour la commande alert
 alertEmbed:
   color: "#2FF200"
   title: "Notification de fermeture de ticket"
@@ -798,8 +798,8 @@ userLeftEmbed:
   thumbnail: ""
 # Gardez ces options en commentaire si vous souhaitez utiliser les valeurs par défaut qui sont le nom de l'utilisateur qui a quitté et l'URL de son icône.
 #  footer:
-#    text: "" 
-#    iconURL: "" 
+#    text: ""
+#    iconURL: ""
   author:
     name: ""
     iconURL: ""
@@ -816,8 +816,8 @@ moveEmbed:
   image: ""
   thumbnail: ""
   footer:
-    text: "" 
-    iconURL: "" 
+    text: ""
+    iconURL: ""
   author:
     name: ""
     iconURL: ""
@@ -854,8 +854,8 @@ pinEmbed:
   image: ""
   thumbnail: ""
   footer:
-    text: "" 
-    iconURL: "" 
+    text: ""
+    iconURL: ""
   author:
     name: ""
     iconURL: ""
@@ -891,8 +891,8 @@ priorityAddEmbed:
   image: ""
   thumbnail: ""
   footer:
-    text: "" 
-    iconURL: "" 
+    text: ""
+    iconURL: ""
   author:
     name: ""
     iconURL: ""
@@ -930,8 +930,8 @@ priorityRemoveEmbed:
   image: ""
   thumbnail: ""
   footer:
-    text: "" 
-    iconURL: "" 
+    text: ""
+    iconURL: ""
   author:
     name: ""
     iconURL: ""
@@ -967,8 +967,8 @@ renameEmbed:
   image: ""
   thumbnail: ""
   footer:
-    text: "" 
-    iconURL: "" 
+    text: ""
+    iconURL: ""
   author:
     name: ""
     iconURL: ""
@@ -1005,8 +1005,8 @@ slowmodeEmbed:
   image: ""
   thumbnail: ""
   footer:
-    text: "" 
-    iconURL: "" 
+    text: ""
+    iconURL: ""
   author:
     name: ""
     iconURL: ""
@@ -1043,8 +1043,8 @@ transferEmbed:
   image: ""
   thumbnail: ""
   footer:
-    text: "" 
-    iconURL: "" 
+    text: ""
+    iconURL: ""
   author:
     name: ""
     iconURL: ""
@@ -1202,7 +1202,7 @@ closeRequestEmbed:
   author:
     name: ""
     iconURL: ""
-    url: ""  
+    url: ""
 
 # Intégration Rouvrir ticket
 reopenEmbed:
@@ -1239,7 +1239,7 @@ logReopenEmbed:
     url: ""
   field_staff: "• Réouvert par"
   field_user: "• Créateur du ticket"
-  field_ticket: "• Ticket" 
+  field_ticket: "• Ticket"
 
 # Intégration pour suppression du ticket
 deleteEmbed:
@@ -1608,7 +1608,7 @@ categoryNotAllowedEmbed:
     url: ""
 
 # ==============================================
-# Logs.txt Salon 
+# Logs.txt Salon
 # ==============================================
 
 # Cette section est destinée aux utilisateurs qui hébergent le bot dans un environnement limité sans accès en écriture à un fichier logs.txt.

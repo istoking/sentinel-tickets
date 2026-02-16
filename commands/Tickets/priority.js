@@ -1,9 +1,6 @@
-const {
-  SlashCommandBuilder,
-  PermissionFlagsBits,
-  MessageFlags,
-} = require("discord.js");
+const { SlashCommandBuilder, PermissionFlagsBits } = require("discord.js");
 const { client, ticketsDB } = require("../../init.js");
+const { config } = require("../../config.js");
 const {
   logMessage,
   checkSupportRole,
@@ -53,7 +50,7 @@ module.exports = {
       return interaction.reply({
         content:
           config.errors.not_in_a_ticket || "You are not in a ticket channel!",
-        flags: MessageFlags.Ephemeral,
+        ephemeral: true,
       });
     }
 
@@ -62,7 +59,7 @@ module.exports = {
       return interaction.reply({
         content:
           config.errors.not_allowed || "You are not allowed to use this!",
-        flags: MessageFlags.Ephemeral,
+        ephemeral: true,
       });
     }
 
@@ -85,7 +82,7 @@ module.exports = {
           content:
             config.commands.priority.alreadyPriority ||
             "This ticket is already assigned a priority!",
-          flags: MessageFlags.Ephemeral,
+          ephemeral: true,
         });
       }
       const isEphemeral =
@@ -93,9 +90,7 @@ module.exports = {
           ? config.priorityAddEmbed.ephemeral
           : false;
 
-      await interaction.deferReply({
-        flags: isEphemeral ? MessageFlags.Ephemeral : undefined,
-      });
+      await interaction.deferReply({ ephemeral: isEphemeral });
       const option = interaction.options.getString("priority");
       let reason =
         interaction.options.getString("reason") || "No reason provided.";
@@ -113,7 +108,7 @@ module.exports = {
         default:
           return interaction.editReply({
             content: "Invalid priority option",
-            flags: isEphemeral ? MessageFlags.Ephemeral : undefined,
+            ephemeral: isEphemeral,
           });
       }
 
@@ -177,7 +172,7 @@ module.exports = {
 
       await interaction.editReply({
         embeds: [priorityAddEmbed],
-        flags: isEphemeral ? MessageFlags.Ephemeral : undefined,
+        ephemeral: isEphemeral,
       });
       if (config.toggleLogs.ticketPriority) {
         try {
@@ -187,7 +182,7 @@ module.exports = {
           client.emit("error", error);
         }
       }
-      await logMessage(
+      logMessage(
         `${interaction.user.tag} updated the priority of the ticket #${interaction.channel.name} to ${option} with reason ${reason}.`,
       );
     }
@@ -198,7 +193,7 @@ module.exports = {
           content:
             config.commands.priority.notPriority ||
             "This ticket is not assigned a priority!",
-          flags: MessageFlags.Ephemeral,
+          ephemeral: true,
         });
       }
       const isEphemeral =
@@ -206,9 +201,7 @@ module.exports = {
           ? config.priorityRemoveEmbed.ephemeral
           : false;
 
-      await interaction.deferReply({
-        flags: isEphemeral ? MessageFlags.Ephemeral : undefined,
-      });
+      await interaction.deferReply({ ephemeral: isEphemeral });
       const channelName = interaction.channel.name;
       const updatedChannelName = priorityEmoji.reduce((acc, emoji) => {
         return acc.replace(emoji, "");
@@ -255,7 +248,7 @@ module.exports = {
 
       await interaction.editReply({
         embeds: [priorityRemoveEmbed],
-        flags: isEphemeral ? MessageFlags.Ephemeral : undefined,
+        ephemeral: isEphemeral,
       });
       if (config.toggleLogs.ticketPriority) {
         try {
@@ -265,7 +258,7 @@ module.exports = {
           client.emit("error", error);
         }
       }
-      await logMessage(
+      logMessage(
         `${interaction.user.tag} removed the priority from the ticket #${interaction.channel.name}.`,
       );
     }

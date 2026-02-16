@@ -1,9 +1,6 @@
-const {
-  SlashCommandBuilder,
-  PermissionFlagsBits,
-  MessageFlags,
-} = require("discord.js");
+const { SlashCommandBuilder, PermissionFlagsBits } = require("discord.js");
 const { configEmbed } = require("../../utils/mainUtils.js");
+const { config } = require("../../config.js");
 
 module.exports = {
   enabled: config.commands.help.enabled,
@@ -19,9 +16,7 @@ module.exports = {
       config.helpEmbed.ephemeral !== undefined
         ? config.helpEmbed.ephemeral
         : true;
-    await interaction.deferReply({
-      flags: isEphemeral ? MessageFlags.Ephemeral : undefined,
-    });
+    await interaction.deferReply({ ephemeral: isEphemeral });
 
     const defaultDMValues = {
       color: "#2FF200",
@@ -160,7 +155,7 @@ module.exports = {
 
     await interaction.editReply({
       embeds: [helpEmbed],
-      flags: isEphemeral ? MessageFlags.Ephemeral : undefined,
+      ephemeral: isEphemeral,
     });
   },
 };

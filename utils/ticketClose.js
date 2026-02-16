@@ -6,6 +6,7 @@ const {
   StringSelectMenuOptionBuilder,
 } = require("discord.js");
 const { mainDB, ticketsDB, client, ticketCategories } = require("../init.js");
+const { config } = require("../config.js");
 const {
   configEmbed,
   getUser,
@@ -380,7 +381,7 @@ async function closeTicket(interaction, reason = "No reason provided.") {
             client.emit("error", error);
           }
         }
-        await logMessage(
+        logMessage(
           `The bot could not DM ${ticketUserID.tag} because their DMs were closed`,
         );
       }

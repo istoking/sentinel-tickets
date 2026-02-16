@@ -2,9 +2,10 @@ const {
   ContextMenuCommandBuilder,
   ApplicationCommandType,
   PermissionFlagsBits,
-  MessageFlags,
 } = require("discord.js");
 const { blacklistRemove } = require("../../utils/userBlacklist.js");
+const { config } = require("../../config.js");
+
 module.exports = {
   enabled: config.contextMenuCommands.blacklistRemove.enabled,
   data: new ContextMenuCommandBuilder()
@@ -25,14 +26,14 @@ module.exports = {
       return interaction.reply({
         content:
           config.errors.not_allowed || "You are not allowed to use this!",
-        flags: MessageFlags.Ephemeral,
+        ephemeral: true,
       });
     }
 
     const member = interaction.targetMember;
     const user = member.user;
     const reason = "Unblacklisted using the Context Menu command";
-    await interaction.deferReply({ flags: MessageFlags.Ephemeral });
+    await interaction.deferReply({ ephemeral: true });
     await blacklistRemove(interaction, user, member, reason, null);
   },
 };

@@ -1,10 +1,9 @@
 const { Events, ActivityType } = require("discord.js");
-const dotenv = require("dotenv");
-dotenv.config({ quiet: true });
 const { REST } = require("@discordjs/rest");
 const { Routes } = require("discord-api-types/v10");
 const { client, mainDB } = require("../init.js");
 const { logMessage } = require("../utils/mainUtils.js");
+const { config } = require("../config.js");
 
 module.exports = {
   name: Events.ClientReady,
@@ -27,12 +26,14 @@ module.exports = {
             ),
           );
 
+          // Filter out the new slash commands that are not already registered
           const newCommands = commands.filter((command) => {
             return !registeredCommands.some((registeredCommand) => {
               return registeredCommand.name === command.name;
             });
           });
 
+          // Filter out the existing slash commands that are not in the new commands
           const removedCommands = registeredCommands.filter(
             (registeredCommand) => {
               return !commands.some((command) => {

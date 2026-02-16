@@ -11,6 +11,7 @@ const {
 } = require("./mainUtils.js");
 const { autoCloseTicket } = require("./ticketAutoClose.js");
 const { autoDeleteTicket } = require("./ticketAutoDelete.js");
+const { config } = require("../config.js");
 
 async function alertTicket(interaction, user, time = null) {
   const closeButton = new ButtonBuilder()
@@ -153,7 +154,7 @@ async function alertTicket(interaction, user, time = null) {
     }
   }
 
-  await logMessage(
+  logMessage(
     `${interaction.user.tag} sent an alert to ${user.tag} in the ticket #${interaction.channel.name}`,
   );
 

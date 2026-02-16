@@ -2,9 +2,9 @@ const {
   ContextMenuCommandBuilder,
   ApplicationCommandType,
   PermissionFlagsBits,
-  MessageFlags,
 } = require("discord.js");
 const { userInfo } = require("../../utils/userInfo.js");
+const { config } = require("../../config.js");
 
 module.exports = {
   enabled: config.contextMenuCommands.userInfo.enabled,
@@ -21,9 +21,7 @@ module.exports = {
         ? config.userInfoEmbed.ephemeral
         : true;
     const member = interaction.targetMember;
-    await interaction.deferReply({
-      flags: isEphemeral ? MessageFlags.Ephemeral : undefined,
-    });
+    await interaction.deferReply({ ephemeral: isEphemeral });
     await userInfo(interaction, member, isEphemeral);
   },
 };

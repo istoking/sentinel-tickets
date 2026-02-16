@@ -1,11 +1,8 @@
-const {
-  SlashCommandBuilder,
-  PermissionFlagsBits,
-  MessageFlags,
-} = require("discord.js");
+const { SlashCommandBuilder, PermissionFlagsBits } = require("discord.js");
 const { ticketsDB } = require("../../init.js");
 const { checkSupportRole } = require("../../utils/mainUtils.js");
 const { unclaimTicket } = require("../../utils/ticketUnclaim.js");
+const { config } = require("../../config.js");
 
 module.exports = {
   enabled: config.commands.unclaim.enabled,
@@ -21,7 +18,7 @@ module.exports = {
       return interaction.reply({
         content:
           config.errors.not_in_a_ticket || "You are not in a ticket channel!",
-        flags: MessageFlags.Ephemeral,
+        ephemeral: true,
       });
     }
 
@@ -30,21 +27,21 @@ module.exports = {
       return interaction.reply({
         content:
           config.errors.not_allowed || "You are not allowed to use this!",
-        flags: MessageFlags.Ephemeral,
+        ephemeral: true,
       });
     }
 
     if (config.claimFeature === false) {
       return interaction.reply({
         content: "The claim feature is currently disabled.",
-        flags: MessageFlags.Ephemeral,
+        ephemeral: true,
       });
     }
 
     if ((await ticketsDB.get(`${interaction.channel.id}.claimed`)) === false) {
       return interaction.reply({
         content: "This ticket has not been claimed!",
-        flags: MessageFlags.Ephemeral,
+        ephemeral: true,
       });
     }
 
@@ -54,11 +51,11 @@ module.exports = {
     ) {
       return interaction.reply({
         content: `You did not claim this ticket, only the user that claimed this ticket can unclaim it! (<@!${await ticketsDB.get(`${interaction.channel.id}.claimUser`)}>)`,
-        flags: MessageFlags.Ephemeral,
+        ephemeral: true,
       });
     }
 
-    await interaction.deferReply({ flags: MessageFlags.Ephemeral });
+    await interaction.deferReply({ ephemeral: true });
     await unclaimTicket(interaction);
   },
 };

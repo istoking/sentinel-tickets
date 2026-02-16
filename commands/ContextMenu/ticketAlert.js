@@ -2,11 +2,12 @@ const {
   ContextMenuCommandBuilder,
   ApplicationCommandType,
   PermissionFlagsBits,
-  MessageFlags,
 } = require("discord.js");
 const { ticketsDB } = require("../../init.js");
 const { checkSupportRole, getUser } = require("../../utils/mainUtils.js");
 const { alertTicket } = require("../../utils/ticketAlert.js");
+const { config } = require("../../config.js");
+
 module.exports = {
   enabled: config.contextMenuCommands.ticketAlert.enabled,
   data: new ContextMenuCommandBuilder()
@@ -21,7 +22,7 @@ module.exports = {
       return interaction.reply({
         content:
           config.errors.not_in_a_ticket || "You are not in a ticket channel!",
-        flags: MessageFlags.Ephemeral,
+        ephemeral: true,
       });
     }
 
@@ -30,7 +31,7 @@ module.exports = {
       return interaction.reply({
         content:
           config.errors.not_allowed || "You are not allowed to use this!",
-        flags: MessageFlags.Ephemeral,
+        ephemeral: true,
       });
     }
 
@@ -42,14 +43,14 @@ module.exports = {
     if (user.bot) {
       return interaction.reply({
         content: "You cannot send a ticket alert to a bot.",
-        flags: MessageFlags.Ephemeral,
+        ephemeral: true,
       });
     }
 
     if (!interaction.channel.members.has(user.id)) {
       return interaction.reply({
         content: "The selected user is not added to this ticket!",
-        flags: MessageFlags.Ephemeral,
+        ephemeral: true,
       });
     }
 

@@ -1,9 +1,8 @@
-const { EmbedBuilder, AttachmentBuilder, MessageFlags } = require("discord.js");
-const dotenv = require("dotenv");
-dotenv.config({ quiet: true });
+const { EmbedBuilder, AttachmentBuilder } = require("discord.js");
 const discordHtmlTranscripts = require("discord-html-transcripts");
 const fs = require("fs");
 const packageJson = require("../package.json");
+const { config } = require("../config.js");
 const {
   client,
   mainDB,
@@ -11,7 +10,6 @@ const {
   ticketCategories,
   blacklistDB,
 } = require("../init.js");
-const date = new Date();
 const options = {
   timeZoneName: "short",
   weekday: "long",
@@ -23,13 +21,15 @@ const options = {
   second: "numeric",
   hour12: true,
 };
-const timeString = date.toLocaleString("en-US", options);
 
+function getTimeString() {
+  return new Date().toLocaleString("en-US", options);
+}
 async function logMessage(message) {
-  const logMessage = `[${timeString}] [Bot v${packageJson.version}] [NodeJS ${process.version}] [LOG] ${message}\n\n`;
+  const line = `[${getTimeString()}] [Bot v${packageJson.version}] [NodeJS ${process.version}] [LOG] ${message}\n\n`;
 
   try {
-    await fs.promises.appendFile("./logs.txt", logMessage);
+    await fs.promises.appendFile("./logs.txt", line);
   } catch (error) {
     error.errorContext = `[logMessage Function Error]: error writing to log file`;
     client.emit("error", error);
@@ -538,9 +538,9 @@ function sanitizeInput(input) {
 async function logError(errorType, error) {
   const errorContext =
     error?.errorContext !== undefined
-      ? `\n[Error Context] -> ${error?.errorContext}`
+      ? `\n[Error Context] ${error?.errorContext}`
       : "";
-  const errorMessage = `[${timeString}] -> [Bot v${packageJson.version}] [Node.JS ${process.version}] [Type: ${errorType}]\n\n${error.stack}\n\n${errorContext}`;
+  const errorMessage = `[${getTimeString()}] [Bot v${packageJson.version}] [NodeJS ${process.version}] [${errorType}]\n${error.stack}${errorContext}\n\n`;
   const logsFileToChannel = config?.logsFileToChannel ?? false;
   const logsFileChannelID = config?.logsFileChannelID ?? "";
 
@@ -548,7 +548,7 @@ async function logError(errorType, error) {
     if (logsFileToChannel && logsFileChannelID) {
       const channel = await getChannel(logsFileChannelID);
       if (channel) {
-        await channel.send(`\`\`\`\n${errorMessage}\n\`\`\``);
+        await channel.send(`\`\`\`${errorMessage}\`\`\``);
       } else {
         throw new Error("Channel not found for logging errors.");
       }
@@ -627,11 +627,6 @@ async function updateStatsChannels() {
       console.error(
         `Channel with ID ${channelID} not found, double check your configuration`,
       );
-      continue;
-    }
-    if (type === "memberCount") {
-      const memberCount = channel.guild.memberCount;
-      await channel.setName(name.replace(/\{stats\}/g, memberCount));
       continue;
     }
     if (type === "avgTicketCreators") {
@@ -748,7 +743,7 @@ async function listUserTickets(interaction, user, isEphemeral) {
 
   await interaction.editReply({
     embeds: [ticketsEmbed],
-    flags: isEphemeral ? MessageFlags.Ephemeral : undefined,
+    ephemeral: isEphemeral,
   });
 }
 
@@ -759,78 +754,6 @@ async function getFirstClosedTicket(userID) {
       ticket.value.userID === userID && ticket.value.status === "Closed",
   );
   return userTickets[0]?.id;
-}
-
-async function getBlacklistedEmbed(
-  interaction,
-  isUserBlacklisted,
-  isRoleBlacklisted,
-) {
-  let expiryDate;
-  let blacklistReason;
-  let blacklistType;
-
-  if (isUserBlacklisted) {
-    const expirationTime =
-      isUserBlacklisted?.timestamp +
-      parseDurationToMilliseconds(isUserBlacklisted?.duration);
-    expiryDate =
-      isUserBlacklisted?.duration === "permanent"
-        ? "Never"
-        : `<t:${Math.floor(expirationTime / 1000)}:R>`;
-    blacklistReason = isUserBlacklisted?.reason;
-    blacklistType = "User";
-  } else if (isRoleBlacklisted) {
-    const expirationTime =
-      isRoleBlacklisted?.timestamp +
-      parseDurationToMilliseconds(isRoleBlacklisted?.duration);
-    expiryDate =
-      isRoleBlacklisted?.duration === "permanent"
-        ? "Never"
-        : `<t:${Math.floor(expirationTime / 1000)}:R>`;
-    blacklistReason = isRoleBlacklisted?.reason;
-    blacklistType = "Role";
-  }
-
-  const defaultblacklistedValues = {
-    color: "#FF0000",
-    title: "Blacklisted",
-    description:
-      "You are currently blacklisted from creating tickets.\nExpires: **{time}**\nReason: **{reason}**\nType: **{type}**",
-    timestamp: true,
-    footer: {
-      text: `${interaction.user.tag}`,
-      iconURL: `${interaction.user.displayAvatarURL({ extension: "png", size: 1024 })}`,
-    },
-  };
-
-  const blacklistedEmbed = await configEmbed(
-    "blacklistedEmbed",
-    defaultblacklistedValues,
-  );
-
-  if (blacklistedEmbed.data && blacklistedEmbed.data.description) {
-    blacklistedEmbed.setDescription(
-      blacklistedEmbed.data.description
-        .replace(/\{time\}/g, expiryDate)
-        .replace(/\{reason\}/g, blacklistReason)
-        .replace(/\{type\}/g, blacklistType),
-    );
-  }
-
-  return blacklistedEmbed;
-}
-
-async function getUserTicketCount(interaction) {
-  return interaction.guild.channels.cache.reduce(async (count, channel) => {
-    if (await ticketsDB.has(channel.id)) {
-      const { userID, status } = await ticketsDB.get(channel.id);
-      if (userID === interaction.user.id && status !== "Closed") {
-        return (await count) + 1;
-      }
-    }
-    return await count;
-  }, Promise.resolve(0));
 }
 
 module.exports = {
@@ -859,6 +782,4 @@ module.exports = {
   updateStatsChannels,
   listUserTickets,
   getFirstClosedTicket,
-  getBlacklistedEmbed,
-  getUserTicketCount,
 };

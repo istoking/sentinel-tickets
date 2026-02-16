@@ -1,9 +1,6 @@
-const {
-  SlashCommandBuilder,
-  PermissionFlagsBits,
-  MessageFlags,
-} = require("discord.js");
+const { SlashCommandBuilder, PermissionFlagsBits } = require("discord.js");
 const { listUserTickets } = require("../../utils/mainUtils.js");
+const { config } = require("../../config.js");
 
 module.exports = {
   enabled: config.commands.tickets.enabled,
@@ -22,7 +19,7 @@ module.exports = {
     if (user.bot) {
       return interaction.reply({
         content: "Bots cannot have tickets.",
-        flags: MessageFlags.Ephemeral,
+        ephemeral: true,
       });
     }
     if (user !== interaction.user) {
@@ -35,7 +32,7 @@ module.exports = {
         return interaction.reply({
           content:
             config.errors.not_allowed || "You are not allowed to use this!",
-          flags: MessageFlags.Ephemeral,
+          ephemeral: true,
         });
       }
     }
@@ -44,9 +41,7 @@ module.exports = {
       config.ticketsEmbed.ephemeral !== undefined
         ? config.ticketsEmbed.ephemeral
         : true;
-    await interaction.deferReply({
-      flags: isEphemeral ? MessageFlags.Ephemeral : undefined,
-    });
+    await interaction.deferReply({ ephemeral: isEphemeral });
     await listUserTickets(interaction, user, isEphemeral);
   },
 };

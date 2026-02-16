@@ -10,31 +10,22 @@
 This is a ticket bot that aims to provide a free and open source solution for managing tickets on Discord. The bot is designed to be lightweight, without any watermarks or unnecessary bloat. It allows users to create, track, and manage tickets seamlessly.
 
 ## Requirements
-- Tested on latest Node.js v22
+- Tested on latest Node.js v18
 
 ## Sponsor
-If you find value in this project, you can support the development by donating $3 on my Patreon! https://www.patreon.com/Ralphkb  
-Consider leaving a star, all support is welcome and really appreciated, thank you! ❤️ 
-
-## Patreon Sponsors
-
-<div style="display: flex; align-items: center;">
-  <div style="width: 32px; height: 32px; border-radius: 50%; overflow: hidden; margin-right: 8px;">
-    <img src="https://github.com/mods-hd.png?size=32" width="32" height="32" alt="Mods HD" />
-  </div>
-  <a href="https://github.com/mods-hd">Mods HD</a> <span style="margin-left: 8px;">(Tier II)</span>
-</div>
+If you find value in this project, you can support the development by donating $3 on my Patreon! https://www.patreon.com/Ralphkb
+Consider leaving a star, all support is welcome and really appreciated, thank you! ❤️
 
 ## Table of Contents
 - [🛠️ Installation](#installation)
 - [🔄 Updating](#updating)
-- [🐛 Bug Reporting](#bug-reporting)
 - [✨ Features](#features)
 - [📚 Documentation](#documentation)
+- [🐛 Bug Reporting](#bug-reporting)
 - [📃 License](#license)
 
 ## Installation
-1. Install Node.js if not already installed (v22 recommended): [Node.js Installation Guide](https://nodejs.org/en/download/)
+1. Install Node.js if not already installed (v18 recommended): [Node.js Installation Guide](https://nodejs.org/en/download/)
 2. Clone the repository: `git clone https://github.com/ralphkb/sentinel-tickets.git` or download the latest release: https://github.com/ralphkb/sentinel-tickets/releases
 3. Change to the project directory, for example: `cd sentinel-tickets` or the directory where you uploaded the release files.
 4. Run `npm install` to install the dependencies
@@ -51,19 +42,12 @@ Consider leaving a star, all support is welcome and really appreciated, thank yo
 5. If any dependencies got updated, you will have to delete your `node_modules` directory and run `npm install` again after you've already uploaded the new files.
 6. Start the updated bot using `npm start`
 
-## Bug Reporting
-- For bug reports, open an issue [here](https://github.com/ralphkb/sentinel-tickets/issues).  
-This is a free project that I enjoy working on in my free time, I cannot guarantee support or updates however I will try my best to fix bugs, maintain the bot and possibly add new features. Thank you for your understanding. 😄  
-You can reach out via Discord or Email if you want to commission a custom feature for the bot tailored to your own needs or use-case.  
-Join my [Discord Server](https://discord.gg/vhXCzj9S3J) for community support. Patreon members receive unique roles on the Discord.
-
 ## Features
 
 - Up to 25 Categories: Organize support requests in different categories.
 - Intuitive Ticket Panel: Create and manage tickets with ease using buttons or a select menu.
 - Option to create many ticket panels and send them to any channel.
 - Modal Questions: Gather necessary information before opening a ticket.
-- Option to disable modal questions per ticket category.
 - Configuration to customize many of the messages and embed options.
 - Option to configure support roles per ticket category.
 - Option to require one or more roles to create a ticket per ticket category.
@@ -88,7 +72,6 @@ Join my [Discord Server](https://discord.gg/vhXCzj9S3J) for community support. P
 - Option to automatically close or delete a ticket after the ticket creator left the discord server.
 - Option to automatically close or delete a ticket after an alert was sent and the ticket creator did not reply in time.
 - Option to automatically delete closed tickets after X amount of time from the ticket's closure time.
-- Automated responses system that will check the input of user questions and reply with pre-configured answers after the ticket is created.
 - DM preference system, allowing users to toggle their preference regarding receiving DMs from the bot such as alert, close, reopen & delete.
 - The ability to create stats channels that will be automatically updated after a configurable amount of time.
 - The ability to adjust some of the stats in case of migrating from a different bot or due to any inconsistency or issues.
@@ -133,7 +116,51 @@ Join my [Discord Server](https://discord.gg/vhXCzj9S3J) for community support. P
     - Average Rating
 
 ## Documentation
-For more information about creating a bot, installation, updating, configuration, permissions, common questions and common errors, check out the documentation website of the bot here: https://sentineltickets.com
+You can find the documentation website of the bot here: https://sentineltickets.com
+
+## Bug Reporting
+- For bug reports, open an issue [here](https://github.com/ralphkb/sentinel-tickets/issues).
+This is a free project that I enjoy working on in my free time, I cannot guarantee support or updates however I will try my best to fix bugs, sort issues and add new features. Thank you for your understanding. 😄
+Join my [Discord Server](https://discord.gg/vhXCzj9S3J) for community support. Patreon members receive unique roles on the discord.
 
 ## License
 This project is licensed under the [MIT License](LICENSE).
+---
+
+## patch notes (2026-02-16)
+
+This patch includes a small set of performance + safety tweaks on top of upstream Sentinel Tickets.
+
+### Summary of changes
+
+**Config loading (performance + consistency)**
+- Added `bot/config.js` and switched the codebase to import a single `config` object from there.
+- The bot now reads/parses `config.yml` once at startup and reuses the cached result instead of re-reading it from disk in every file.
+- Config parsing now fails with clearer error context when `config.yml` is missing or malformed.
+
+**Interval / scheduled job hardening (reliability)**
+- Wrapped scheduled tasks (cleanup, auto-close, auto-delete, stats updates) with a simple guard so a slow run can’t overlap with the next tick.
+- Added basic sanity defaults for interval values (e.g. falling back to a safe number if the config value is missing/invalid).
+- Added a minimum floor on some intervals to prevent accidental “spam loop” configs.
+
+**Startup loading (stability)**
+- Command and event loading is more defensive: a single broken file won’t take down the whole boot.
+- Errors during module loading include enough context to quickly identify the bad command/event.
+
+**Logging (correct timestamps + better context)**
+- Error logs now timestamp each entry at write-time (instead of using a timestamp captured once at process start).
+- Error logging includes optional “error context” when present to help pinpoint the exact failing area without digging through stack traces.
+
+**Cooldown edge-cases (command safety)**
+- Hardened cooldown math so a missing entry can’t produce `NaN` remaining time.
+- Cooldown checks behave the same, but now fail safely under odd state.
+
+### Files touched / added
+
+- **Added:** `bot/config.js` (central config loader + cache)
+- **Updated:** `bot/index.js` (use shared config + guarded intervals)
+- **Updated:** `bot/init.js` (use shared config)
+- **Updated:** `bot/utils/mainUtils.js` (runtime timestamps + richer error context)
+- **Updated:** various `bot/commands/**` and `bot/events/**` files (switched config imports to the shared loader)
+
+If you ever want to diff this against upstream again later, the easiest way is to search for `require("./config.js")` and `guardedInterval(` — those mark most of the functional changes.

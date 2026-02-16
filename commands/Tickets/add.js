@@ -1,9 +1,6 @@
-const {
-  SlashCommandBuilder,
-  PermissionFlagsBits,
-  MessageFlags,
-} = require("discord.js");
+const { SlashCommandBuilder, PermissionFlagsBits } = require("discord.js");
 const { client, ticketsDB, ticketCategories } = require("../../init.js");
+const { config } = require("../../config.js");
 const {
   sanitizeInput,
   logMessage,
@@ -39,7 +36,7 @@ module.exports = {
       return interaction.reply({
         content:
           config.errors.not_in_a_ticket || "You are not in a ticket channel!",
-        flags: MessageFlags.Ephemeral,
+        ephemeral: true,
       });
     }
 
@@ -48,7 +45,7 @@ module.exports = {
       return interaction.reply({
         content:
           config.errors.not_allowed || "You are not allowed to use this!",
-        flags: MessageFlags.Ephemeral,
+        ephemeral: true,
       });
     }
 
@@ -66,7 +63,7 @@ module.exports = {
     if ((!user && !role) || (user && role)) {
       return interaction.reply({
         content: "Please provide either a user or a role, but not both.",
-        flags: MessageFlags.Ephemeral,
+        ephemeral: true,
       });
     }
 
@@ -75,12 +72,10 @@ module.exports = {
       if (interaction.channel.members.has(user.id)) {
         return interaction.reply({
           content: "That user is already in this ticket.",
-          flags: MessageFlags.Ephemeral,
+          ephemeral: true,
         });
       }
-      await interaction.deferReply({
-        flags: isEphemeral ? MessageFlags.Ephemeral : undefined,
-      });
+      await interaction.deferReply({ ephemeral: isEphemeral });
 
       let ticketButton = await ticketsDB.get(
         `${interaction.channel.id}.button`,
@@ -158,7 +153,7 @@ module.exports = {
       await ticketsDB.push(`${interaction.channel.id}.addedUsers`, user.id);
       await interaction.editReply({
         embeds: [userAddEmbed],
-        flags: isEphemeral ? MessageFlags.Ephemeral : undefined,
+        ephemeral: isEphemeral,
       });
       if (config.commands.add.pingUser) {
         await interaction.channel.send(`<@${user.id}>`);
@@ -171,7 +166,7 @@ module.exports = {
           client.emit("error", error);
         }
       }
-      await logMessage(
+      logMessage(
         `${interaction.user.tag} added ${user.tag} to the ticket #${interaction.channel.name} with reason ${reason}`,
       );
     }
@@ -181,12 +176,10 @@ module.exports = {
       if (interaction.channel.permissionsFor(role.id).has("ViewChannel")) {
         return interaction.reply({
           content: "That role is already in this ticket.",
-          flags: MessageFlags.Ephemeral,
+          ephemeral: true,
         });
       }
-      await interaction.deferReply({
-        flags: isEphemeral ? MessageFlags.Ephemeral : undefined,
-      });
+      await interaction.deferReply({ ephemeral: isEphemeral });
 
       let ticketButton = await ticketsDB.get(
         `${interaction.channel.id}.button`,
@@ -263,7 +256,7 @@ module.exports = {
       await ticketsDB.push(`${interaction.channel.id}.addedRoles`, role.id);
       await interaction.editReply({
         embeds: [roleAddEmbed],
-        flags: isEphemeral ? MessageFlags.Ephemeral : undefined,
+        ephemeral: isEphemeral,
       });
       if (config.toggleLogs.userAdd) {
         try {
@@ -273,7 +266,7 @@ module.exports = {
           client.emit("error", error);
         }
       }
-      await logMessage(
+      logMessage(
         `${interaction.user.tag} added ${role.name} to the ticket #${interaction.channel.name} with reason ${reason}`,
       );
     }

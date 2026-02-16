@@ -1,6 +1,7 @@
 const { Collection } = require("discord.js");
-require("dotenv").config({ quiet: true });
+const fs = require("fs");
 const path = require("path");
+const { config } = require("./config.js");
 const { client, ticketsDB } = require("./init.js");
 const {
   cleanBlacklist,
@@ -10,35 +11,48 @@ const {
 } = require("./utils/mainUtils.js");
 const { autoCloseTicket } = require("./utils/ticketAutoClose.js");
 const { autoDeleteTicket } = require("./utils/ticketAutoDelete.js");
-const fs = require("fs");
+
 client.startingTime = Date.now();
 
-const blacklistInterval = config.blacklistCleanup || 120;
-// Schedule the blacklist cleanup check every blacklistInterval seconds
-setInterval(cleanBlacklist, blacklistInterval * 1000);
+function guardedInterval(fn) {
+  let running = false;
+
+  return async () => {
+    if (running) return;
+    running = true;
+    try {
+      await fn();
+    } catch (error) {
+      try {
+        await logError("SCHEDULED_TASK_ERROR", error);
+      } catch {
+        console.log(error);
+      }
+    } finally {
+      running = false;
+    }
+  };
+}
+
+const blacklistInterval = Number(config.blacklistCleanup) || 120;
+setInterval(guardedInterval(cleanBlacklist), Math.max(blacklistInterval, 30) * 1000);
 
 async function autoCloseTickets() {
   const currentTime = Math.floor(Date.now() / 1000); // Current time in seconds
   const tickets = (await ticketsDB.all()) || [];
-  const openTickets = tickets.filter(
-    (ticket) => ticket.value.status === "Open",
-  );
-  const autoCloseTime = config?.autoCloseTickets?.time || 86400; // Time in seconds
+  const openTickets = tickets.filter((ticket) => ticket.value?.status === "Open");
+  const autoCloseTime = Number(config?.autoCloseTickets?.time) || 86400;
 
-  if (openTickets.length > 0) {
-    for (const ticket of openTickets) {
-      const channelID = ticket.id;
-      const lastMsgTime = await lastChannelMsgTimestamp(channelID);
-      if (lastMsgTime === null) {
-        continue;
-      }
+  for (const ticket of openTickets) {
+    const channelID = ticket.id;
+    const lastMsgTime = await lastChannelMsgTimestamp(channelID);
+    if (lastMsgTime === null) continue;
 
-      const lastMsgTimeSeconds = Math.floor(lastMsgTime / 1000);
-      const timeDifference = currentTime - lastMsgTimeSeconds;
+    const lastMsgTimeSeconds = Math.floor(lastMsgTime / 1000);
+    const timeDifference = currentTime - lastMsgTimeSeconds;
 
-      if (timeDifference > autoCloseTime) {
-        await autoCloseTicket(channelID);
-      }
+    if (timeDifference > autoCloseTime) {
+      await autoCloseTicket(channelID);
     }
   }
 }
@@ -46,44 +60,38 @@ async function autoCloseTickets() {
 async function autoDeleteTickets() {
   const currentTime = Math.floor(Date.now() / 1000); // Current time in seconds
   const tickets = (await ticketsDB.all()) || [];
-  const closedTickets = tickets.filter(
-    (ticket) => ticket.value.status === "Closed",
-  );
-  const autoDeleteTime = config?.autoDeleteTickets?.time || 86400; // Time in seconds
+  const closedTickets = tickets.filter((ticket) => ticket.value?.status === "Closed");
+  const autoDeleteTime = Number(config?.autoDeleteTickets?.time) || 86400;
 
-  if (closedTickets.length > 0) {
-    for (const ticket of closedTickets) {
-      const channelID = ticket.id;
-      const { closedAt } = ticket.value;
+  for (const ticket of closedTickets) {
+    const channelID = ticket.id;
+    const closedAt = ticket.value?.closedAt;
 
-      if (closedAt === 0 || closedAt === undefined) {
-        continue;
-      }
+    if (!closedAt) continue;
 
-      const closedAtSeconds = Math.floor(closedAt / 1000);
-      const timeDifference = currentTime - closedAtSeconds;
+    const closedAtSeconds = Math.floor(closedAt / 1000);
+    const timeDifference = currentTime - closedAtSeconds;
 
-      if (timeDifference > autoDeleteTime) {
-        await autoDeleteTicket(channelID);
-      }
+    if (timeDifference > autoDeleteTime) {
+      await autoDeleteTicket(channelID);
     }
   }
 }
 
-if (config.autoCloseTickets.enabled) {
-  const autoCloseInterval = config?.autoCloseTickets?.interval || 60;
-  setInterval(autoCloseTickets, autoCloseInterval * 1000);
+if (config?.autoCloseTickets?.enabled) {
+  const autoCloseInterval = Number(config?.autoCloseTickets?.interval) || 60;
+  setInterval(guardedInterval(autoCloseTickets), Math.max(autoCloseInterval, 30) * 1000);
 }
 
-if (config.autoDeleteTickets.enabled) {
-  const autoDeleteInterval = config?.autoDeleteTickets?.interval || 60;
-  setInterval(autoDeleteTickets, autoDeleteInterval * 1000);
+if (config?.autoDeleteTickets?.enabled) {
+  const autoDeleteInterval = Number(config?.autoDeleteTickets?.interval) || 60;
+  setInterval(guardedInterval(autoDeleteTickets), Math.max(autoDeleteInterval, 30) * 1000);
 }
 
-if (config.statsChannels.enabled) {
-  const statsInterval = parseInt(config?.statsChannels?.interval, 10) || 600;
+if (config?.statsChannels?.enabled) {
+  const statsInterval = Number.parseInt(config?.statsChannels?.interval, 10) || 600;
   const statsIntervalMs = Math.max(statsInterval * 1000, 600 * 1000);
-  setInterval(updateStatsChannels, statsIntervalMs);
+  setInterval(guardedInterval(updateStatsChannels), statsIntervalMs);
 }
 
 // Holding commands cooldown data
@@ -96,30 +104,52 @@ for (const folder of commandFolders) {
   const commandFiles = fs
     .readdirSync(`./commands/${folder}`)
     .filter((file) => file.endsWith(".js"));
+
   for (const file of commandFiles) {
-    const command = require(`./commands/${folder}/${file}`);
-    if (command.enabled) {
-      if (!config.silentStartup) {
-        console.log(`The slash command [${file}] has been loaded!`);
+    try {
+      const command = require(`./commands/${folder}/${file}`);
+      if (command?.enabled) {
+        if (!config.silentStartup) {
+          console.log(`The slash command [${file}] has been loaded!`);
+        }
+        client.commands.set(command.data.name, command);
       }
-      client.commands.set(command.data.name, command);
+    } catch (error) {
+      error.errorContext = `[Command Load Error]: ./commands/${folder}/${file}`;
+      console.log(error);
+      await logError("COMMAND_LOAD_ERROR", error);
     }
   }
 }
 
 // Reading event files
 const eventsPath = path.join(__dirname, "events");
-const eventFiles = fs
-  .readdirSync(eventsPath)
-  .filter((file) => file.endsWith(".js"));
+const eventFiles = fs.readdirSync(eventsPath).filter((file) => file.endsWith(".js"));
 
 for (const file of eventFiles) {
   const filePath = path.join(eventsPath, file);
-  const event = require(filePath);
-  if (event.once) {
-    client.once(event.name, (...args) => event.execute(...args));
-  } else {
-    client.on(event.name, (...args) => event.execute(...args));
+  try {
+    const event = require(filePath);
+
+    const safeExecute = async (...args) => {
+      try {
+        await event.execute(...args);
+      } catch (error) {
+        error.errorContext = `[Event Handler Error]: ${event.name}`;
+        console.log(error);
+        await logError("EVENT_HANDLER_ERROR", error);
+      }
+    };
+
+    if (event.once) {
+      client.once(event.name, safeExecute);
+    } else {
+      client.on(event.name, safeExecute);
+    }
+  } catch (error) {
+    error.errorContext = `[Event Load Error]: ${filePath}`;
+    console.log(error);
+    await logError("EVENT_LOAD_ERROR", error);
   }
 }
 
@@ -144,23 +174,32 @@ process.on("uncaughtException", async (error) => {
   await logError("uncaughtException", error);
 });
 
+process.on("SIGINT", async () => {
+  try {
+    await logError("SHUTDOWN", new Error("Process received SIGINT"));
+  } catch {}
+  process.exit(0);
+});
+
 // Log in to Discord with your app's token
 client.login(process.env.BOT_TOKEN).catch(async (error) => {
-  if (error.message.includes("An invalid token was provided")) {
+  if (error?.message?.includes("An invalid token was provided")) {
     console.log(error);
     await logError("INVALID_TOKEN", error);
-    process.exit();
-  } else if (
-    error.message.includes(
+    process.exit(1);
+  }
+
+  if (
+    error?.message?.includes(
       "Privileged intent provided is not enabled or whitelisted.",
     )
   ) {
     console.log(error);
     await logError("DISALLOWED_INTENTS", error);
-    process.exit();
-  } else {
-    console.log(error);
-    await logError("ERROR", error);
-    process.exit();
+    process.exit(1);
   }
+
+  console.log(error);
+  await logError("ERROR", error);
+  process.exit(1);
 });

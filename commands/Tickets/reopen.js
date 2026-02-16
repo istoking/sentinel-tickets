@@ -1,11 +1,8 @@
-const {
-  SlashCommandBuilder,
-  PermissionFlagsBits,
-  MessageFlags,
-} = require("discord.js");
+const { SlashCommandBuilder, PermissionFlagsBits } = require("discord.js");
 const { ticketsDB } = require("../../init.js");
 const { checkSupportRole } = require("../../utils/mainUtils.js");
 const { reopenTicket } = require("../../utils/ticketReopen.js");
+const { config } = require("../../config.js");
 
 module.exports = {
   enabled: config.commands.reopen.enabled,
@@ -21,14 +18,14 @@ module.exports = {
       return interaction.reply({
         content:
           config.errors.not_in_a_ticket || "You are not in a ticket channel!",
-        flags: MessageFlags.Ephemeral,
+        ephemeral: true,
       });
     }
 
     if ((await ticketsDB.get(`${interaction.channel.id}.status`)) === "Open") {
       return interaction.reply({
         content: "This ticket is already open!",
-        flags: MessageFlags.Ephemeral,
+        ephemeral: true,
       });
     }
 
@@ -37,7 +34,7 @@ module.exports = {
       return interaction.reply({
         content:
           config.errors.not_allowed || "You are not allowed to use this!",
-        flags: MessageFlags.Ephemeral,
+        ephemeral: true,
       });
     }
 

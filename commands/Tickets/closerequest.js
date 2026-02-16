@@ -1,11 +1,8 @@
-const {
-  SlashCommandBuilder,
-  PermissionFlagsBits,
-  MessageFlags,
-} = require("discord.js");
+const { SlashCommandBuilder, PermissionFlagsBits } = require("discord.js");
 const { ticketsDB } = require("../../init.js");
 const { getUser } = require("../../utils/mainUtils.js");
 const { closeRequestTicket } = require("../../utils/ticketCloseRequest.js");
+const { config } = require("../../config.js");
 
 module.exports = {
   enabled: config.commands.closerequest.enabled,
@@ -27,7 +24,7 @@ module.exports = {
       return interaction.reply({
         content:
           "This feature is currently disabled because you have the permission to close your own ticket.",
-        flags: MessageFlags.Ephemeral,
+        ephemeral: true,
       });
     }
 
@@ -35,7 +32,7 @@ module.exports = {
       return interaction.reply({
         content:
           config.errors.not_in_a_ticket || "You are not in a ticket channel!",
-        flags: MessageFlags.Ephemeral,
+        ephemeral: true,
       });
     }
 
@@ -44,7 +41,7 @@ module.exports = {
     ) {
       return interaction.reply({
         content: "This ticket is already closed!",
-        flags: MessageFlags.Ephemeral,
+        ephemeral: true,
       });
     }
 
@@ -54,7 +51,7 @@ module.exports = {
     if (interaction.user !== ticketUserID) {
       return interaction.reply({
         content: "You are not the ticket creator!",
-        flags: MessageFlags.Ephemeral,
+        ephemeral: true,
       });
     }
 

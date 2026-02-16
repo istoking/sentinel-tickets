@@ -1,15 +1,16 @@
 const { ButtonBuilder, ButtonStyle, ActionRowBuilder } = require("discord.js");
 const { ticketsDB, ticketCategories } = require("../init.js");
 const { configEmbed, sanitizeInput, logMessage } = require("./mainUtils.js");
+const { config } = require("../config.js");
 
 async function closeRequestTicket(interaction, reason = "No reason provided.") {
   const ticketButton = await ticketsDB.get(`${interaction.channel.id}.button`);
 
   const closeButton = new ButtonBuilder()
     .setCustomId("closeTicket")
-    .setLabel(config.closeRequestButton.label)
-    .setEmoji(config.closeRequestButton.emoji)
-    .setStyle(ButtonStyle[config.closeRequestButton.style]);
+    .setLabel(config.closeButton.label)
+    .setEmoji(config.closeButton.emoji)
+    .setStyle(ButtonStyle[config.closeButton.style]);
 
   const row = new ActionRowBuilder().addComponents(closeButton);
 

@@ -80,5 +80,5 @@ Il s'agit d'un bot de ticket qui vise à fournir une solution gratuite et open s
 Le wiki sera amélioré au fil du temps et peut être consulté ici : https://github.com/ralphkb/sentinel-tickets/wiki
 
 ## Signalement de bugs
-- Pour les rapports de bugs, ouvrez un problème [ici](https://github.com/ralphkb/sentinel-tickets/issues).  
+- Pour les rapports de bugs, ouvrez un problème [ici](https://github.com/ralphkb/sentinel-tickets/issues).
 Ceci est un projet gratuit sur lequel j'aime travailler pendant mon temps libre, je ne peux pas garantir un support mais je ferai de mon mieux pour corriger les bugs, résoudre les problèmes et ajouter de nouvelles fonctionnalités ! Je suis toujours en train d'apprendre et de m'améliorer, merci pour votre compréhension

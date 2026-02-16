@@ -7,9 +7,6 @@
   "scripts": {
     "start": "node index.js"
   },
-  "engines": {
-    "node": ">=20"
-  },
   "keywords": [
     "node",
     "javascript",
@@ -18,22 +15,25 @@
   ],
   "author": "ralphkb",
   "license": "MIT",
+  "engines": {
+    "node": ">=18"
+  },
   "dependencies": {
-    "@discordjs/rest": "^2.6.0",
-    "better-sqlite3": "^12.6.2",
+    "@discordjs/rest": "^2.4.0",
+    "better-sqlite3": "^11.6.0",
     "discord-html-transcripts": "^3.2.0",
-    "discord.js": "^14.25.1",
-    "dotenv": "^17.2.3",
-    "moment-timezone": "^0.6.0",
+    "discord.js": "^14.16.3",
+    "dotenv": "^16.4.6",
+    "moment-timezone": "^0.5.46",
     "quick.db": "^9.1.7",
-    "yaml": "^2.8.2"
+    "yaml": "^2.6.1"
   },
   "devDependencies": {
-    "@eslint/eslintrc": "^3.3.3",
-    "@eslint/js": "^9.39.2",
-    "eslint": "^9.39.2",
-    "eslint-config-prettier": "^10.1.8",
-    "globals": "^17.0.0",
-    "prettier": "^3.8.0"
+    "@eslint/eslintrc": "^3.2.0",
+    "@eslint/js": "^9.16.0",
+    "eslint": "^9.16.0",
+    "eslint-config-prettier": "^9.1.0",
+    "globals": "^15.13.0",
+    "prettier": "^3.4.1"
   }
 }

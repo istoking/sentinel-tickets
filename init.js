@@ -1,9 +1,8 @@
 const { Client, GatewayIntentBits } = require("discord.js");
-const path = require("path");
-const yaml = require("yaml");
-const { QuickDB } = require("quick.db");
 const fs = require("fs");
-require("dotenv").config({ quiet: true });
+const path = require("path");
+const { QuickDB } = require("quick.db");
+const { config } = require("./config.js");
 
 const client = new Client({
   intents: [
@@ -14,74 +13,42 @@ const client = new Client({
   ],
 });
 
-const configFile = fs.readFileSync("./config.yml", "utf8");
-globalThis.config = yaml.parse(configFile);
-
-let dbPath = "";
-if (config.dbPath === undefined) {
-  dbPath = path.join(__dirname, "data");
-} else if (config.dbPath?.includes("{root}")) {
-  dbPath = config.dbPath.replace("{root}", __dirname);
-} else {
-  dbPath = config.dbPath;
-}
-
-const dataDir = path.resolve(dbPath);
-console.log(`Using data directory: ${dataDir}`);
-
+// Check if the data directory exists, and if not, create it
+const dataDir = path.join(__dirname, "data");
 if (!fs.existsSync(dataDir)) {
   fs.mkdirSync(dataDir, { recursive: true });
 }
 
 const mainDB = new QuickDB({ filePath: path.join(dataDir, "main.sqlite") });
-const ticketsDB = new QuickDB({
-  filePath: path.join(dataDir, "tickets.sqlite"),
-});
-const blacklistDB = new QuickDB({
-  filePath: path.join(dataDir, "blacklist.sqlite"),
-});
+const ticketsDB = new QuickDB({ filePath: path.join(dataDir, "tickets.sqlite") });
+const blacklistDB = new QuickDB({ filePath: path.join(dataDir, "blacklist.sqlite") });
 
 (async function () {
-  // Initialize totalTickets to 1 if it doesn't exist
-  if (!(await mainDB.has("totalTickets"))) {
-    await mainDB.set("totalTickets", 1);
-  }
+  // Initialize defaults if they don't exist
+  const defaults = {
+    totalTickets: 1,
+    openTickets: 0,
+    totalClaims: 0,
+    totalReviews: 0,
+    ratings: [],
+    totalMessages: 0,
+    ticketCreators: [],
+  };
 
-  // Initialize openTickets to an empty array if it doesn't exist
-  if (!(await mainDB.has("openTickets"))) {
-    await mainDB.set("openTickets", 0);
-  }
-
-  // Initialize totalClaims to 0 if it doesn't exist
-  if (!(await mainDB.has("totalClaims"))) {
-    await mainDB.set("totalClaims", 0);
-  }
-
-  // Initialize totalReviews to 0 if it doesn't exist
-  if (!(await mainDB.has("totalReviews"))) {
-    await mainDB.set("totalReviews", 0);
-  }
-
-  // Initialize ratings to an empty array if it doesn't exist
-  if (!(await mainDB.has("ratings"))) {
-    await mainDB.set("ratings", []);
-  }
-
-  // Initialize totalMessages to 0 if it doesn't exist
-  if (!(await mainDB.has("totalMessages"))) {
-    await mainDB.set("totalMessages", 0);
-  }
-
-  // Initialize ticketCreators to an empty array if it doesn't exist
-  if (!(await mainDB.has("ticketCreators"))) {
-    await mainDB.set("ticketCreators", []);
+  for (const [key, value] of Object.entries(defaults)) {
+    if (!(await mainDB.has(key))) {
+      await mainDB.set(key, value);
+    }
   }
 })();
 
 // Extract information from the config.yml to properly setup the ticket categories
 const ticketCategories = [];
+const configuredCategories = Array.isArray(config?.TicketCategories)
+  ? config.TicketCategories
+  : [];
 
-config.TicketCategories.forEach((category) => {
+for (const category of configuredCategories) {
   const {
     id,
     name,
@@ -108,24 +75,29 @@ config.TicketCategories.forEach((category) => {
     ticketTopic,
     slowmode,
     useCodeBlocks,
-    modal,
     modalTitle,
     questions,
-  } = category;
+  } = category || {};
 
-  const extractedQuestions = questions.map((question) => {
-    const { label, placeholder, style, required, minLength, maxLength } =
-      question;
+  const extractedQuestions = Array.isArray(questions)
+    ? questions.map((question) => {
+        const { label, placeholder, style, required, minLength, maxLength } =
+          question || {};
 
-    return {
-      label,
-      placeholder,
-      style,
-      required,
-      minLength,
-      maxLength,
-    };
-  });
+        return {
+          label,
+          placeholder,
+          style,
+          required,
+          minLength,
+          maxLength,
+        };
+      })
+    : [];
+
+  if (id === undefined || id === null) {
+    continue;
+  }
 
   ticketCategories[id] = {
     name,
@@ -152,11 +124,10 @@ config.TicketCategories.forEach((category) => {
     ticketTopic,
     slowmode,
     useCodeBlocks,
-    modal,
     modalTitle,
     questions: extractedQuestions,
   };
-});
+}
 
 module.exports = {
   client,

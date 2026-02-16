@@ -14,6 +14,7 @@ const {
 } = require("../utils/mainUtils.js");
 const { autoCloseTicket } = require("../utils/ticketAutoClose.js");
 const { autoDeleteTicket } = require("../utils/ticketAutoDelete.js");
+const { config } = require("../config.js");
 
 module.exports = {
   name: Events.GuildMemberRemove,

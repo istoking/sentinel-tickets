@@ -1,9 +1,6 @@
-const {
-  SlashCommandBuilder,
-  PermissionFlagsBits,
-  MessageFlags,
-} = require("discord.js");
+const { SlashCommandBuilder, PermissionFlagsBits } = require("discord.js");
 const { client, ticketsDB, ticketCategories } = require("../../init.js");
+const { config } = require("../../config.js");
 const {
   checkSupportRole,
   sanitizeInput,
@@ -31,7 +28,7 @@ module.exports = {
       return interaction.reply({
         content:
           config.errors.not_in_a_ticket || "You are not in a ticket channel!",
-        flags: MessageFlags.Ephemeral,
+        ephemeral: true,
       });
     }
 
@@ -40,7 +37,7 @@ module.exports = {
       return interaction.reply({
         content:
           config.errors.not_allowed || "You are not allowed to use this!",
-        flags: MessageFlags.Ephemeral,
+        ephemeral: true,
       });
     }
 
@@ -56,14 +53,14 @@ module.exports = {
     if (optionUser === currentUser) {
       return interaction.reply({
         content: "This user is already the creator of this ticket.",
-        flags: MessageFlags.Ephemeral,
+        ephemeral: true,
       });
     }
 
     if (optionUser.bot) {
       return interaction.reply({
         content: "You cannot transfer a ticket to a bot.",
-        flags: MessageFlags.Ephemeral,
+        ephemeral: true,
       });
     }
 
@@ -72,9 +69,7 @@ module.exports = {
         ? config.transferEmbed.ephemeral
         : false;
 
-    await interaction.deferReply({
-      flags: isEphemeral ? MessageFlags.Ephemeral : undefined,
-    });
+    await interaction.deferReply({ ephemeral: isEphemeral });
     await interaction.channel.permissionOverwrites.delete(currentUser);
     await ticketsDB.set(`${interaction.channel.id}.userID`, optionUser.id);
 
@@ -172,13 +167,13 @@ module.exports = {
 
     await interaction.editReply({
       embeds: [transferEmbed],
-      flags: isEphemeral ? MessageFlags.Ephemeral : undefined,
+      ephemeral: isEphemeral,
     });
     if (config.commands.transfer.pingUser) {
       await interaction.channel.send(`<@${optionUser.id}>`);
     }
 
-    await logMessage(
+    logMessage(
       `${interaction.user.tag} transferred the ownership of the ticket #${interaction.channel.name} to the user ${optionUser.tag}.`,
     );
   },

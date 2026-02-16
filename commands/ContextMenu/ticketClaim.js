@@ -2,11 +2,11 @@ const {
   ContextMenuCommandBuilder,
   ApplicationCommandType,
   PermissionFlagsBits,
-  MessageFlags,
 } = require("discord.js");
 const { ticketsDB, mainDB } = require("../../init.js");
 const { checkSupportRole, getUser } = require("../../utils/mainUtils.js");
 const { claimTicket } = require("../../utils/ticketClaim.js");
+const { config } = require("../../config.js");
 
 module.exports = {
   enabled: config.contextMenuCommands.ticketClaim.enabled,
@@ -23,7 +23,7 @@ module.exports = {
     if (isClaimInProgress) {
       return interaction.reply({
         content: "Another user is already claiming this ticket.",
-        flags: MessageFlags.Ephemeral,
+        ephemeral: true,
       });
     }
 
@@ -39,7 +39,7 @@ module.exports = {
       return interaction.reply({
         content:
           config.errors.not_in_a_ticket || "You are not in a ticket channel!",
-        flags: MessageFlags.Ephemeral,
+        ephemeral: true,
       });
     }
 
@@ -54,7 +54,7 @@ module.exports = {
       return interaction.reply({
         content:
           config.errors.not_allowed || "You are not allowed to use this!",
-        flags: MessageFlags.Ephemeral,
+        ephemeral: true,
       });
     }
 
@@ -67,7 +67,7 @@ module.exports = {
       });
       return interaction.reply({
         content: "The claim feature is currently disabled.",
-        flags: MessageFlags.Ephemeral,
+        ephemeral: true,
       });
     }
 
@@ -90,7 +90,7 @@ module.exports = {
       });
       return interaction.reply({
         content: `This ticket has already been claimed by ${claimUser}`,
-        flags: MessageFlags.Ephemeral,
+        ephemeral: true,
       });
     }
 
@@ -105,11 +105,11 @@ module.exports = {
       });
       return interaction.reply({
         content: "You cannot claim a closed ticket!",
-        flags: MessageFlags.Ephemeral,
+        ephemeral: true,
       });
     }
 
-    await interaction.deferReply({ flags: MessageFlags.Ephemeral });
+    await interaction.deferReply({ ephemeral: true });
     await claimTicket(interaction);
   },
 };

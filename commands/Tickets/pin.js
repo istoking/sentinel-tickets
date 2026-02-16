@@ -1,11 +1,8 @@
-const {
-  SlashCommandBuilder,
-  PermissionFlagsBits,
-  MessageFlags,
-} = require("discord.js");
+const { SlashCommandBuilder, PermissionFlagsBits } = require("discord.js");
 const { ticketsDB } = require("../../init.js");
 const { checkSupportRole } = require("../../utils/mainUtils.js");
 const { pinTicket } = require("../../utils/ticketPin.js");
+const { config } = require("../../config.js");
 
 module.exports = {
   enabled: config.commands.pin.enabled,
@@ -21,7 +18,7 @@ module.exports = {
       return interaction.reply({
         content:
           config.errors.not_in_a_ticket || "You are not in a ticket channel!",
-        flags: MessageFlags.Ephemeral,
+        ephemeral: true,
       });
     }
 
@@ -30,7 +27,7 @@ module.exports = {
       return interaction.reply({
         content:
           config.errors.not_allowed || "You are not allowed to use this!",
-        flags: MessageFlags.Ephemeral,
+        ephemeral: true,
       });
     }
 
@@ -40,16 +37,14 @@ module.exports = {
       return interaction.reply({
         content:
           config.commands.pin.alreadyPinned || "This ticket is already pinned!",
-        flags: MessageFlags.Ephemeral,
+        ephemeral: true,
       });
     }
     const isEphemeral =
       config.pinEmbed.ephemeral !== undefined
         ? config.pinEmbed.ephemeral
         : false;
-    await interaction.deferReply({
-      flags: isEphemeral ? MessageFlags.Ephemeral : undefined,
-    });
+    await interaction.deferReply({ ephemeral: isEphemeral });
     await pinTicket(interaction, pinEmoji, isEphemeral);
   },
 };
