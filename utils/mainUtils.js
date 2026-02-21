@@ -95,35 +95,43 @@ async function getMember(id) {
 }
 
 async function getRole(id) {
-  let role = client.guilds.cache.get(process.env.GUILD_ID).roles.cache.get(id);
+  if (id === undefined || id === null) return null;
+  const snowflake = String(id).trim();
+  if (!snowflake) return null;
+
+  const guild = client.guilds.cache.get(process.env.GUILD_ID);
+  if (!guild) return null;
+
+  let role = guild.roles.cache.get(snowflake);
 
   if (role) {
     return role;
   } else {
     try {
-      role = await client.guilds.cache
-        .get(process.env.GUILD_ID)
-        .roles.fetch(id);
+      role = await guild.roles.fetch(snowflake);
       return role;
     } catch (error) {
-      error.errorContext = `[getRole Function Error]: error fetching role with ID ${id}`;
+      error.errorContext = `[getRole Function Error]: error fetching role with ID ${snowflake}`;
       client.emit("error", error);
       return null;
     }
   }
 }
-
 async function getChannel(id) {
-  let channel = client.channels.cache.get(id);
+  if (id === undefined || id === null) return null;
+  const snowflake = String(id).trim();
+  if (!snowflake) return null;
+
+  let channel = client.channels.cache.get(snowflake);
 
   if (channel) {
     return channel;
   } else {
     try {
-      channel = await client.channels.fetch(id);
+      channel = await client.channels.fetch(snowflake);
       return channel;
     } catch (error) {
-      error.errorContext = `[getChannel Function Error]: error fetching channel with ID ${id}`;
+      error.errorContext = `[getChannel Function Error]: error fetching channel with ID ${snowflake}`;
       client.emit("error", error);
       return null;
     }
@@ -136,13 +144,18 @@ const findAvailableCategory = async (categoryIDs) => {
       'categoryID and closedCategoryID of each configured ticket category must be an array, such as ["ID"]',
     );
   }
+
   for (const categoryID of categoryIDs) {
     const category = await getChannel(categoryID);
-    const channelCount = category.children.cache.size;
+    if (!category) continue;
+
+    // Discord category channels can have up to 50 children.
+    const channelCount = category.children?.cache?.size ?? 0;
     if (channelCount < 50) {
-      return categoryID;
+      return String(categoryID).trim();
     }
   }
+
   return null; // No available category found
 };
 

@@ -129,7 +129,7 @@ This project is licensed under the [MIT License](LICENSE).
 
 ## Local patch notes (2026-02-16)
 
-This patch includes a small set of performance + safety tweaks on top of upstream Sentinel Tickets.
+This zip includes a small set of performance + safety tweaks on top of upstream Sentinel Tickets. Nothing here is meant to change how tickets work day-to-day — it’s mostly about cutting repeated work, avoiding edge-case crashes, and making scheduled jobs more reliable.
 
 ### Summary of changes
 

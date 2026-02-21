@@ -76,7 +76,7 @@ module.exports = {
         cooldownEmbed.data.description.replace(/\{time\}/g, `${remainingSeconds}`),
       );
     }
-const maxOpenTickets = config.maxOpenTickets || 1;
+    const maxOpenTickets = config.maxOpenTickets || 1;
     const defaultValues = {
       color: "#FF0000",
       title: "Maximum Tickets Open",
@@ -216,9 +216,18 @@ const maxOpenTickets = config.maxOpenTickets || 1;
         const selectMenuOptions = await mainDB.get(
           `selectMenuOptions-${messageId}`,
         );
+
         await interaction.channel.messages
           .fetch(messageId)
           .then(async (message) => {
+            const opts = Array.isArray(selectMenuOptions?.options)
+              ? selectMenuOptions.options
+              : [];
+
+            // If the stored menu options are missing (restart/DB wipe), don't crash the handler.
+            // Skip rebuilding the menu and allow normal ticket flow to continue.
+            if (opts.length === 0) return;
+
             const selectMenu = new StringSelectMenuBuilder()
               .setCustomId("categoryMenu")
               .setPlaceholder(
@@ -227,8 +236,7 @@ const maxOpenTickets = config.maxOpenTickets || 1;
               )
               .setMinValues(1)
               .setMaxValues(1)
-              .addOptions(selectMenuOptions.options);
-
+              .addOptions(opts);
             const updatedActionRow = new ActionRowBuilder().addComponents(
               selectMenu,
             );
